@@ -1,0 +1,12 @@
+# A Heat environment file which can be used to enable a
+# a Neutron Load Balancer as a Service driver backend.
+resource_registry:
+  OS::TripleO::ControllerExtraConfigPre: ../puppet/extraconfig/pre_deploy/controller/neutron-lbaas.yaml
+
+parameter_defaults:
+  NeutronServicePlugins: router,neutron_lbaas.services.loadbalancer.plugin.LoadBalancerPluginv2
+
+  NeutronEnableLbaasAgent: true
+  NeutronLbaasInterfaceDriver: 'neutron.agent.linux.interface.OVSInterfaceDriver'
+  NeutronLbaasDeviceDriver: 'neutron.services.loadbalancer.drivers.haproxy.namespace_driver.HaproxyNSDriver'
+  NeutronLbaasServiceProviders: 'LOADBALANCERV2:Haproxy:neutron_lbaas.drivers.haproxy.plugin_driver.HaproxyOnHostPluginDriver:default'

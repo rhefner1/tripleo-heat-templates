@@ -1,0 +1,54 @@
+heat_template_version: 2015-04-30
+
+description: Configure hieradata for Neutron LBaaS configuration
+
+parameters:
+  server:
+    description: ID of the controller node to apply this config to
+    type: string
+
+  # Config specific parameters, to be provided via parameter_defaults
+  NeutronEnableLbaasAgent:
+    type: boolean
+    default: true
+  NeutronLbaasInterfaceDriver:
+    type: string
+    default: 'neutron.agent.linux.interface.OVSInterfaceDriver'
+  NeutronLbaasDeviceDriver:
+    type: string
+    default: 'neutron.services.loadbalancer.drivers.haproxy.namespace_driver.HaproxyNSDriver'
+  NeutronLbaasServiceProviders:
+    type: string
+    default: 'LOADBALANCERV2:Haproxy:neutron_lbaas.drivers.haproxy.plugin_driver.HaproxyOnHostPluginDriver:default'
+
+resources:
+  NeutronLbaasConfig:
+    type: OS::Heat::StructuredConfig
+    properties:
+      group: os-apply-config
+      config:
+        hiera:
+          datafiles:
+            neutron_lbaas_data:
+              mapped_data:
+                neutron::enable_lbaas_agent: {get_input: EnableLbaasAgent}
+                neutron::lbaas::interface_driver: {get_input: InterfaceDriver}
+                neutron::lbaas::device_driver: {get_input: DeviceDriver}
+                neutron::services::lbaas::service_providers: {get_input: ServiceProviders}
+
+  NeutronLbaasDeployment:
+    type: OS::Heat::StructuredDeployment
+    properties:
+      name: NeutronLbaasDeployment
+      config: {get_resource: NeutronLbaasConfig}
+      server: {get_param: server}
+      input_values:
+        EnableLbaasAgent: {get_param: NeutronEnableLbaasAgent}
+        InterfaceDriver: {get_param: NeutronLbaasInterfaceDriver}
+        DeviceDriver: {get_param: NeutronLbaasDeviceDriver}
+        ServiceProviders: {get_param: NeutronLbaasServiceProviders}
+
+outputs:
+  deploy_stdout:
+    description: Deployment reference, used to trigger puppet apply on changes
+    value: {get_attr: [NeutronLbaasDeployment, deploy_stdout]}

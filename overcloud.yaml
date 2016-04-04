@@ -682,6 +682,7 @@ parameters:
       - OS::TripleO::Services::Keystone
       - OS::TripleO::Services::GlanceApi
       - OS::TripleO::Services::GlanceRegistry
+      - OS::TripleO::Services::NeutronLbaas
     description: A list of service resources (configured in the Heat
                  resource_registry) which represent nested stacks
                  for each service that should get installed on the Controllers.

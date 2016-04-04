@@ -1,0 +1,30 @@
+heat_template_version: 2016-04-08
+
+description: >
+  Neutron LBaaS service with Pacemaker configured with Puppet
+
+parameters:
+  EndpointMap:
+    default: {}
+    description: Mapping of service endpoint -> protocol. Typically set
+                 via parameter_defaults in the resource registry.
+    type: json
+  MysqlVirtualIPUri:
+    type: string
+    default: ''
+
+resources:
+
+  NeutronLbaasServiceBase:
+    type: ../neutron-lbaas.yaml
+
+outputs:
+  role_data:
+    description: Role data for the Neuron LBaaS pacemaker role.
+    value:
+      config_settings:
+        map_merge:
+          - get_attr: [NeutronLbaasServiceBase, role_data, config_settings]
+          - neutron::agents::lbaas::manage_service: false
+      step_config: |
+        include ::tripleo::profile::pacemaker::neutron::lbaas
